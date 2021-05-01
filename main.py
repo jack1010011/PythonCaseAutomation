@@ -23,59 +23,15 @@ browser = webdriver.Chrome('D:\\chromedriver.exe')
 # Login phase
 def log_into_conseroGlobal():
     browser.get('https://clientlogin.conseroglobal.com/')
+    # Make sure the window has the correct size so theres no need for horizontal scrolling
     browser.set_window_size(1500, 1500,windowHandle='current')
-    username = browser.find_element_by_id('username')
-    username.send_keys('shalom@conseroglobal.com')
+    browser.find_element_by_id('username').send_keys('shalom@conseroglobal.com')
     elem = browser.find_element_by_id('password')
     elem.send_keys('#SHALOMeli1')
     elem.submit()
 
-def search_Companies():
-    browser.get('https://clientlogin.conseroglobal.com/Company/Index')
-    time.sleep(5)
-    delay = 10  # seconds
-    try:
-        myElem = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.ID, 'companyListSearch')))
-        print
-        "Page is ready!"
-    except TimeoutException:
-        print
-        "Loading took too much time!"
-    companyName = input("Company Name:")
-    print("Username is: " + companyName)
-    #user input interaction window
-    import tkinter as tk
-
-    root = tk.Tk()
-    root.wm_geometry("800x600")
-    dialog = tk.Toplevel(root)
-    root_name = root.winfo_pathname(root.winfo_id())
-    dialog_name = dialog.winfo_pathname(dialog.winfo_id())
-    root.tk.eval('tk::PlaceWindow {0} widget {1}'.format(dialog_name, root_name))
-    root.mainloop()
-    #another user input interaction window
-    import tkinter as tk
-    from tkinter import simpledialog
-
-    ROOT = tk.Tk()
-
-    ROOT.withdraw()
-    # the input dialog
-    USER_INP = simpledialog.askstring(title="Test",
-                                      prompt="What's the Company Name?:")
-
-    # check it out
-    print("Hello", USER_INP)
-
-
-
-
-
-    myElem = browser.find_element_by_id('companyListSearch')
-    myElem.send_keys('CompanyName')
-    time.sleep(5)
-
 def MainMethod():
+    #                       PHASE 1 (Search CompanyName Details)
     browser.get('https://clientlogin.conseroglobal.com/Company/Index')
     time.sleep(45)
     myElem = browser.find_element_by_id('companyListSearch')
@@ -94,14 +50,10 @@ def MainMethod():
     # Search the CompanyId based on the CompanyName entered
     myElem.send_keys(USER_INP_CompanyName)
     time.sleep(5)
+
     CompanyId = browser.find_element_by_class_name('ag-cell-wrapper')
     print(f"CompanyName: '{USER_INP_CompanyName}', CompanyId: '{CompanyId.text}'")
-
-    # Make sure the window has the correct size so theres no need for horizontal scrolling
-    browser.set_window_size(1500, 1500, windowHandle='current')
     #browser.get(f'https://clientlogin.conseroglobal.com/Company/Details/{elem}')
-
-
 
     # If the button is not enabled then we need to edit the company
     #link = browser.find_element_by_link_text('Edit')
@@ -109,46 +61,36 @@ def MainMethod():
     #or visit https://clientlogin.conseroglobal.com/Company/Edit?id=2323  but replacing the id with companyId
 
 
-    #Add members
-    link = browser.find_element_by_link_text('Details')
-    link.click()
 
-    AddMemberButton = browser.find_element_by_link_text('Add Member')
-    AddMemberButton.click()
+
+
+    #                       PHASE 2 (Add members)
+    browser.find_element_by_link_text('Details').click()
+    browser.find_element_by_link_text('Add Member').click()
 
         # Select User
-    UserField = browser.find_element_by_id('select2-user-container')
-    UserField.click()
-    searchUserField = browser.find_element_by_class_name('select2-search__field')
-    searchUserField.send_keys('shalom@conseroglobal.com')
-
-    searchUser = browser.find_element_by_class_name('select2-results__option')
-    searchUser.click()
-        #or
-    #browser.find_element_by_id('select2-user-results').click()
-        #or
-    #from selenium.webdriver.common.keys import Keys
-    #UserField.sendKeys(Keys.TAB);
+    browser.find_element_by_id('select2-user-container').click()
+    browser.find_element_by_class_name('select2-search__field').send_keys('shalom@conseroglobal.com')
+    browser.find_element_by_class_name('select2-results__option').click()
 
         # Select Role
-    UserField = browser.find_element_by_id('select2-role-container')
-    UserField.click()
-    searchUserField = browser.find_element_by_class_name('select2-search__field')
-    searchUserField.send_keys('Consero - Manager')
-    searchRole = browser.find_element_by_class_name('select2-results__option')
-    searchRole.click()
+    browser.find_element_by_id('select2-role-container').click()
+    browser.find_element_by_class_name('select2-search__field').send_keys('Consero - Manager')
+    browser.find_element_by_class_name('select2-results__option').click()
 
         # Select Title
-    UserField = browser.find_element_by_id('select2-roleTitle-container')
-    UserField.click()
-    searchUserField = browser.find_element_by_class_name('select2-search__field')
-    searchUserField.send_keys('Resource')
-    searchRole = browser.find_element_by_class_name('select2-results__option')
-    searchRole.click()
+    browser.find_element_by_id('select2-roleTitle-container').click()
+    browser.find_element_by_class_name('select2-search__field').send_keys('Resource')
+    browser.find_element_by_class_name('select2-results__option').click()
 
     # Click on the 'Add' yellow Button
-    submit = browser.find_element_by_id('teamMemberAdd')
-    submit.click()
+    browser.find_element_by_id('teamMemberAdd').click()
+
+
+
+
+
+    #                       PHASE 3 Filtering CompanyName & CompanyID Details
 
     #ir a ControlDock
     browser.get('https://clientlogin.conseroglobal.com/Activity/Index')
@@ -178,6 +120,14 @@ def MainMethod():
     searchFilter = browser.find_element_by_xpath("//div[@id='activitiesTable_filter']/label/input[@aria-controls='activitiesTable']");
     searchFilter.send_keys('financials')
 
+
+
+
+
+
+
+    #                       PHASE 4 Confirm the Status of the ActivityId
+
     #if status = review, we cannot see the view financial button - (We want them to be in 'In Progress' status. Otherwise we can't do much)
 
     #Take the Actividad id = 1400198     https://clientlogin.conseroglobal.com/Activity/Details/1400198
@@ -185,10 +135,44 @@ def MainMethod():
     # if Intacct Validation Errors != 0 => on Variance, get the item different than 0 => get the account (number)
 
 
+
+
+
+
+
+    #                       PHASE 5 DB Query (to retrieve the "Debit" and "Credit" values
     #=========================================   DB  ===========================================================
+    #Why Python with SQL? For Data Analysts and Data Scientists, Python has many advantages
+
     # Go to DB with that Account number and return the amount (acumulado de esa cuenta para el mes en curso)
 
-    # ======================================  INTACCT ===========================================================
+    # Reference =>  https://docs.microsoft.com/en-us/azure/azure-sql/database/connect-query-python#create-code-to-query-your-database
+    # install pyodbc
+    import pyodbc
+    server = 'jvtmcg7krk.database.windows.net'
+    database = 'consero-prod'
+    username = 'conThinkSupport'
+    password = 'C0n$ero@l0ckDown_469'
+    driver = '{ODBC Driver 17 for SQL Server}'
+
+    with pyodbc.connect(
+            'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT TOP (1000) [ActivityId],[ActivityName] FROM [dbo].[Activities]")
+            row = cursor.fetchone()
+            while row:
+                print(str(row[0]) + " " + str(row[1]))
+                row = cursor.fetchone()
+
+
+
+
+
+
+
+
+    #                       PHASE 6 Go to Intacct and compare the "Debit" and "Credit" values
+
     # Go to intact con el rango de la fecha y account number (1400198)
     # https://www.intacct.com/ia/acct/frameset.phtml?.sess=AJxHs50-9USRDQRQRmB_sDdsRJANBA..&.cc=RaQslWQXvAEgzxFDvNhkfE4dhd-p004ui9fZgIV0hDQ.
     # Go to Applications => my Practice => Clients/Entities => Flat View button click =>
@@ -212,23 +196,12 @@ def MainMethod():
 
 
     # click on (GenerateValidate and Review Financial  =>  https://clientlogin.conseroglobal.com/Activity/Details/1421502
-
     # wait.until(EC.presence_of_element_located((By.XPATH, xpath_value))).send_keys(Keys.RETURN)
 
 
-def SIMPL_Access():
-    browser.get('https://clientlogin.conseroglobal.com/Home/ClientPortalOverview')
-    time.sleep(5)
-
-def ControlDock_ActivityList():
-    browser.get('https://clientlogin.conseroglobal.com/Activity/Index')
-    time.sleep(7)
-    browser.find_element_by_xpath("//select[@name='SelectedKickOffMonth']/option[text()='2021-4']").click()
-    time.sleep(5)
-
 def list_Companies():
     #elem = browser.find_element_by_class_name('ag-center-cols-container')
-    bol1 =  messagebox.askquestion("Title", "askquestion")
+    bol1 = messagebox.askquestion("Title", "askquestion")
     messagebox.showinfo("Title", f'ans is {bol1}')
 
     bol2 = messagebox.askokcancel("Title", "askokcancel")
@@ -244,16 +217,6 @@ def close_Browser():
     time.sleep(5)
     browser.quit()
 
-def interactive_Financials():
-    browser.get('https://clientlogin.conseroglobal.com/Home/ClientPortalOverview')
-    time.sleep(5)
-    link = browser.find_element_by_link_text('Interactive Financials')
-    link.click()
-    time.sleep(5)
-    link = browser.find_element_by_link_text('Sales')
-    link.click()
-    time.sleep(5)
-    elem = browser.find_element_by_class_name('dataTables_scrollBody')
 
     table_id = browser.find_element_by_id('nlrTable1_wrapper')
     rows = table_id.find_element_by_tag_name("tr")  # get all of the rows in the table
