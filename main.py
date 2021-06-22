@@ -2,6 +2,7 @@
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import this
 import time
 
 
@@ -17,8 +18,57 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from tkinter import messagebox, Button, Label
 
+def ui():
+    import tkinter.messagebox
+
+    root = tkinter.Tk()
+    root.title('Codemy.com')
+    # root.iconbitmap('c:/gui/codemy.ico')
+    root.geometry("400x500")
+
+    Title_Label = Label(root, text="Intacct Validation Errors ")
+    Title_Label.pack()
+
+    def SIMPLENavigate():
+        Navegation()
+        conseroGlobalAuth()
+        get_CompanyID()
+        print(f"CompanyName: '{Company.Name}', CompanyId: '{Company.Id}'")
+        label1 = Label(root, text=f"CompanyName = '{Company.Name}' \nCompanyId= '{Company.Id}'")
+        label1.pack(pady=20)
+        addMembers()
+        get_CompanyID_from_CompanyName()
+        get_activityId_status("ActivityId")
+
+    button1 = tkinter.Button(root, text="SIMPLE", command=SIMPLENavigate)
+    button1.pack()
+
+
+
+    def DB_Credit_Debit():
+        print("Testing")
+        DateRange = DefaultDateRange()
+        print(f'Selected date from {Company.StartDate} to {Company.EndDate}')
+        get_Debit_and_Credit_DB()
+        label2 = Label(root, text=f"DebitAmount = '{Company.Debit}' \nCreditAmount= '{Company.Credit}'")
+        label2.pack(pady=20)
+
+    button2 = tkinter.Button(root, text="Get DB Credit & Debit", command=DB_Credit_Debit)
+    button2.pack()
+
+    def onClickExit():
+        print("Testing222")
+        root.destroy()
+        root.quit()
+
+    buttonExit = tkinter.Button(root, text="Continue", command=onClickExit)
+    buttonExit.pack(pady=10)
+
+    root.mainloop()
+
+
 def Navegation():
-    browser.set_window_size(1500, 1500, windowHandle='current')
+    browser.set_window_size(1500, 900, windowHandle='current')
     phase[0] = 0
     phase[1] = "Navigation Initiation "
     phase[2] = "Authentication"
@@ -53,11 +103,30 @@ def get_CompanyID():
     # myElem = browser.find_element_by_id('companyListSearch')
     try:
         myElem = WebDriverWait(browser, 60).until( ec.visibility_of_element_located((By.ID, 'companyListSearch')))
+        print(f"Item Loaded Quickly !")
     except:
-        print(f"Item didn't load. Re-attempting... ")
-        get_CompanyID()
+        print(f"Item failed to load. Error: 60 sec time out. ")
+        try:
+            print("Extending Time-out to 145.")
+            print("Re-attempting...")
+            myElem = WebDriverWait(browser, 145).until(ec.visibility_of_element_located((By.ID, 'companyListSearch')))
+            print(f"Item Loaded!")
+            print("*** Item took 50% longer than usual to load! *** ")
+        except:
+            print(f"Item failed to load. Error: 145 sec time out. ")
+            try:
+                print("Extending Time-Out to 345sec !")
+                myElem = WebDriverWait(browser, 345).until(ec.visibility_of_element_located((By.ID, 'companyListSearch')))
+                print(f"Item Loaded!")
+                print("*** Item took 575% longer than usual to load! *** ")
+            except:
+                print("Item took longer than 345 sec. Time out.")
+                print("Re-attempting expecting long time wait...")
+                get_CompanyID()
+                pass
+            pass
         pass
-    print(f" Item Loaded! ")
+
 
     # Pop up user input interaction window requesting Company Name
     import tkinter as tk
@@ -73,6 +142,7 @@ def get_CompanyID():
     myElem.send_keys(CompanyName)
 
     #CompanyIdEle = browser.find_element_by_class_name('ag-cell-wrapper')
+    time.sleep(0.5)
     CompanyIdEle = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.CLASS_NAME, 'ag-cell-wrapper')))
     CompanyId = CompanyIdEle.text
 
@@ -83,13 +153,14 @@ def get_CompanyID():
     setattr(Company, "Name", CompanyName)
 
 
-    phase[0] = 1
-    phase[1] = "Search CompanyName Details"
-    phase[2] = "Add members"
-    print_hi(f' - Phase {phase[0]} - {phase[1]} - Completed!')
+    #phase[0] = 1
+    #phase[1] = "Search CompanyName Details"
+    #phase[2] = "Add members"
+    #print_hi(f' - Phase {phase[0]} - {phase[1]} - Completed!')
+
+
 
     #browser.get(f'https://clientlogin.conseroglobal.com/Company/Details/{elem}')
-
     # If the button is not enabled then we need to edit the company
     #link = browser.find_element_by_link_text('Edit')
     #link.click()
@@ -124,14 +195,14 @@ def addMembers():
         browser.find_element_by_id('teamMemberAdd').click()
     except:
         print(f'Skip adding. "{user}" is already a Team member for "{Company.Name}".')
-        messagebox.showinfo("User is Already a member for this company.Skip ", f'{user} is already a member of {Company.Name}.')
+        #messagebox.showinfo("User is Already a member for this company.Skip ", f'{user} is already a member of {Company.Name}.')
         pass
 
 
-    phase[0] = 2
-    phase[1] = "Add members"
-    phase[2] = "Filtering CompanyName & CompanyID Details"
-    print_hi(f' - Phase {phase[0]} - {phase[1]} - Completed!')
+    #phase[0] = 2
+    #phase[1] = "Add members"
+    #phase[2] = "Filtering CompanyName & CompanyID Details"
+    #print_hi(f' - Phase {phase[0]} - {phase[1]} - Completed!')
 
 def get_CompanyID_from_CompanyName():
     #                       PHASE 3 Filtering CompanyName & CompanyID Details
@@ -150,24 +221,50 @@ def get_CompanyID_from_CompanyName():
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as ec
 
-    # myElem = browser.find_element_by_class_name('multiselect-selected-text')
-    myElem = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.CLASS_NAME, 'multiselect-selected-text')))
-    print(f" Item Loaded! ")
-    myElem.click()
+    while True:
+        try:
+            # myElem = browser.find_element_by_class_name('multiselect-selected-text')
+            myElem = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.CLASS_NAME, 'multiselect-selected-text')))
+            print(f" Item Loaded! ")
+            myElem.click()
+            break
+        except:
+            print('Failed!, Trying in 0.5 sec... ')
+            time.sleep(0.5)
+            pass
 
 
-    #Select all
-    # browser.find_element_by_class_name('multiselect-all').click()
-    myElem = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.CLASS_NAME, 'multiselect-all')))
-    print(f" Item Loaded! ")
-    myElem.click()
+
+    while True:
+        try:
+            # Select all
+            # browser.find_element_by_class_name('multiselect-all').click()
+            myElem = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.CLASS_NAME, 'multiselect-all')))
+            print(f" Item Loaded! ")
+            myElem.click()
+            break
+        except:
+            print('Failed!, Trying in 0.5 sec... ')
+            time.sleep(0.5)
+            pass
 
 
-    #Unselect all
-    #browser.find_element_by_class_name('multiselect-all').click()
-    myElem = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.CLASS_NAME, 'multiselect-all')))
-    print(f" Item Loaded! ")
-    myElem.click()
+
+    while True:
+        try:
+            # Unselect all
+            # browser.find_element_by_class_name('multiselect-all').click()
+            myElem = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.CLASS_NAME, 'multiselect-all')))
+            print(f" Item Loaded! ")
+            myElem.click()
+            break
+        except:
+            print('Failed!, Trying in 0.5 sec... ')
+            time.sleep(0.5)
+            pass
+
+
+
 
 
         #Search for the CompanyName
@@ -334,7 +431,7 @@ def get_Debit_and_Credit_DB():
                     f"SELECT DebitAmount, CreditAmount FROM [{database}].[dbo].[GLDETAILSDDSDATAS] WHERE GlAccountNumber BETWEEN 0 AND 99999 AND glpostingdate BETWEEN '{startDate}' AND '{endDate}' AND IsDeleted=0")
                 row = cursor.fetchone()
                 while row:
-                    print(str(row[0]) + " " + str(row[1]))
+                    # print(str(row[0]) + " " + str(row[1]))
                     CreditTotal += int(row[0])
                     DebitTotal += int(row[1])
                     row = cursor.fetchone()
@@ -378,7 +475,7 @@ def db_query_SuperUser ():
                     f"SELECT DebitAmount, CreditAmount FROM [{database}].[dbo].[GLDETAILSDDSDATAS] WHERE GlAccountNumber BETWEEN 0 AND 99999 AND glpostingdate BETWEEN '{startDate}' AND '{endDate}' AND IsDeleted=0")
                 row = cursor.fetchone()
                 while row:
-                    print(str(row[0]) + " " + str(row[1]))
+                    #print(str(row[0]) + " " + str(row[1]))
                     CreditTotal += int(row[0])
                     DebitTotal += int(row[1])
                     row = cursor.fetchone()
@@ -506,8 +603,8 @@ def get_Debit_and_Credit_Intacct():
         if counter==24:
             time.sleep(0.5)
             nextItem.perform()
-            time.sleep(0.5)
-            tab.perform()
+            #time.sleep(0.5)
+            #tab.perform()
             time.sleep(0.5)
             enter.perform()
             break
@@ -675,8 +772,6 @@ def DataLoad():
     elem.send_keys('#SHALOMeli1')
     elem.submit()
 
-
-
     # https://consero-prod-north.azurewebsites.net/api/Intacct/TriggerAPIToReloadData?companyId=2582&startDate=05/01/2021&endDate=05/31/2021&IntervalInDays=30
 
     encaps = Company.StartDate.split("/")
@@ -686,9 +781,15 @@ def DataLoad():
     Company.EndDate = f"{encaps[0]}/{encaps[1]}/20{encaps[2]}"
 
     dataloadLink = f"https://consero-prod-north.azurewebsites.net/api/Intacct/TriggerAPIToReloadData?companyId={Company.Id}&startDate={Company.StartDate}&endDate={Company.EndDate}&IntervalInDays=30"
-    print(dataloadLink)
+    print("DATALOAD!!! ====>    ", dataloadLink)
 
-    browser.get(dataloadLink)
+    DLN = messagebox.askyesno('','Perform DataLoad Now?')
+
+    if DLN:
+        browser.get(dataloadLink)
+        print("DataLoad COMPLETED!")
+    else:
+        print("DataLoad Skipped...")
 
     # cuándo termine de cargar la data, le das regenerate.... también puedes volver a revisar el backend SIMPL para ver si ya coinciden
 
@@ -697,6 +798,71 @@ def DataLoad():
     phase[1] = 'DataLoad'
     phase[2] = "Phase 10 - Go to Intacct and compare Debit and Credit values"
     print_hi(f' - Phase {phase[0]} - {phase[1]} - Completed!')
+#Requires CompanyId
+def Get_DataLoad_Status():
+    print("DataLoad Status: ")
+    import pyodbc
+    server = 'jvtmcg7krk.database.windows.net'
+    database = f'consero-prod'
+    username = 'consero-admin@jvtmcg7krk'
+    password = 'C0nser0P0rtalI$Awes0me'
+    driver = '{ODBC Driver 17 for SQL Server}'
+    # Company.Id = '2434'
+
+    try:
+        with pyodbc.connect(
+                'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""Select TOP 1 Id, IsDataProcessed, SchedulerRunLogId, DATEADD(hour, -6, RefreshStarted) AS RefreshStartedLOCALTIME, DATEADD(hour, -6, RefreshCompleted) AS RefreshCompletedLOCALTIME, DATEADD(hour, -6, LastProcessedFileTimeStamp) AS LastProcessedFileTimeStampLOCALTIME, * 
+                    FROM [{database}].[dbo].[SchedulerRunCompanyLogs] SRCL 
+                    WHERE CompanyId IN ({Company.Id}) and IsStagingSuccess = 1 order by SRCL.RefreshStarted desc""")
+                row = cursor.fetchone()
+                while row:
+                    print(f"DataLoad StartDate = {str(row[3])}")
+                    print(f"DataLoad EndDate   = {str(row[4])}")
+                    row = cursor.fetchone()
+        #setattr(Company, "DataLoadStatus", DebitTotal)
+    except:
+        print("SuperUser DB query failed! ")
+        pass
+#Requires CompanyId
+def Get_Financial_Report_Regeneration_Status():
+    print("Financial Report Regeneration Status: ")
+    import pyodbc
+    server = 'jvtmcg7krk.database.windows.net'
+    database = f'consero-prod'
+    username = 'consero-admin@jvtmcg7krk'
+    password = 'C0nser0P0rtalI$Awes0me'
+    driver = '{ODBC Driver 17 for SQL Server}'
+    # Company.Id = '2434'
+
+    try:
+        with pyodbc.connect(
+                'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"SELECT TOP 1 C.CompanyId, C.Name as CompanyName, CMSWA.ActionStatus, CMSWA.Action, DATEADD(hour, -6, StartActionTime) AS StartActionTimeLOCALTIME, DATEADD(hour, -6, EndActionTime) AS EndActionTimeLOCALTIME, U.Email, IC.BudgetIdWithData, C.BudgetId,  * FROM [{database}].[dbo].[CMSWorkflowAudits] CMSWA INNER JOIN [consero-prod].[dbo].[Companies] C ON CMSWA.CompanyId = C.CompanyId INNER JOIN [consero-prod].[dbo].[IntacctCompanies] IC ON IC.CompanyId = C.CompanyId INNER JOIN [consero-prod].[dbo].[Users] U ON UserId = CMSWA.ActionBy WHERE CMSWA.CompanyId IN ({Company.Id}) ORDER BY Id DESC")
+                row = cursor.fetchone()
+                while row:
+                    ActionStatus = {
+                        -1: "Failure",
+                        0: "InProgress",
+                        1: "Success",
+                        2: "BoxUpload",
+                        3: "NotGenerated",
+                        4: "PartiallyGenerated",
+                    }
+                    Status = ActionStatus.get(row[2], "Invalid State")
+                    print(Status)
+                    print(str(row[0]) + " " + str(row[1]) + " " + str(row[2]) + " From " + str(row[4]) + " To " + str( row[5]))
+
+                    row = cursor.fetchone()
+        setattr(Company, "FinancialReportStatus", Status)
+    except:
+        print("Failure attempting to get Financial Report Regeneration Status ")
+        pass
+    return Status
 
 def list_Companies():
     #elem = browser.find_element_by_class_name('ag-center-cols-container')
@@ -762,74 +928,78 @@ if __name__ == '__main__':
     phase[1] = ''
     phase[2] = ''
 
-
-
-    if confirm_Next():
-        print('Next')
-
-    # Navegation
     browser = webdriver.Chrome('D:\\chromedriver.exe')
-    Navegation()
 
-    # Authentication
-    # conseroGlobalAuth()
-    if confirm_Next():
+    Q = messagebox.askyesno("","Use Automated System?")
+    if not Q:
+        ui()
+    else:
+        # Navegation
+        Navegation()
+
+        # Authentication
         conseroGlobalAuth()
 
-    # PHASE 1 (Search CompanyName Details)
-    # get_CompanyNameDetails()
-    if confirm_Next():
+        # PHASE 1 (Search CompanyName Details)
+        # get_CompanyNameDetails()
+        #if confirm_Next():
         get_CompanyID()
         print(f"CompanyName: '{Company.Name}', CompanyId: '{Company.Id}'")
 
-    # PHASE 2 (Add members)
-    # addMembers()
-    if confirm_Next():
+        # PHASE 2 (Add members)
+        # if confirm_Next():
         addMembers()
 
-    # PHASE 3 Filtering CompanyName & CompanyID Details
-    # get_CompanyID_from_CompanyName()
-    if confirm_Next():
+        # PHASE 3 Filtering CompanyName & CompanyID Details
+        # get_CompanyID_from_CompanyName()
+        # if confirm_Next():
         get_CompanyID_from_CompanyName()
 
-
-    # PHASE 4 Confirm the Status of the ActivityId
-    # get_activityId_status(ActivityId):
-    output = messagebox.askokcancel("Title", f"Phase {phase[0]}: {phase[1]}  - Completed. Continue with Phase {phase[0] + 1}?")
-    if confirm_Next():
+        # PHASE 4 Confirm the Status of the ActivityId
+        # get_activityId_status(ActivityId):
+        output = messagebox.askokcancel("Title",
+                                        f"Phase {phase[0]}: {phase[1]}  - Completed. Continue with Phase {phase[0] + 1}?")
+        # if confirm_Next():
         get_activityId_status("ActivityId")
 
-    # Get Default Date Range
-    if confirm_Next():
-        DateRange = DefaultDateRange()
-        print(f'Selected date from {Company.StartDate} to {Company.EndDate}')
+        # Get Default Date Range
+        if confirm_Next():
+            DateRange = DefaultDateRange()
+            print(f'Selected date from {Company.StartDate} to {Company.EndDate}')
 
+        # PHASE 5 DB Query (to retrieve the "Debit" and "Credit" values
+        # get_Debit_and_Credit_DB(CompanyId)
+        if confirm_Next():
+            get_Debit_and_Credit_DB()
+            try:
+                messagebox.showinfo(f'{Company.Id} - {Company.Name} ', f'DebitAmount    = {Company.Debit} '
+                                                                       f'\nCreditAmount   = {Company.Credit}'
+                                                                       f'\nDo they match? =  {Company.Credit == Company.Debit}'
+    
+    
+                                                                       f'\n\nFrom {Company.StartDate} to {Company.EndDate}')
+            except:
+                print(this.c)
+                pass
+        if confirm_Next():
+            getIntacctCompanyID()
 
-    # PHASE 5 DB Query (to retrieve the "Debit" and "Credit" values
-    # get_Debit_and_Credit_DB(CompanyId)
-    if confirm_Next():
-        get_Debit_and_Credit_DB()
-        messagebox.showinfo(f'{Company.Id} - {Company.Name} ', f'DebitAmount    = {Company.Debit} '
-                                                             f'\nCreditAmount   = {Company.Credit}'
-                                                             f'\nDo they match? =  {Company.Credit == Company.Debit}'
+        if confirm_Next():
+            get_Debit_and_Credit_Intacct()
 
-            
-                                                           f'\n\nFrom {Company.StartDate} to {Company.EndDate}')
-    if confirm_Next():
-        getIntacctCompanyID()
+        if confirm_Next():
+            Get_DataLoad_Status()
+            Get_Financial_Report_Regeneration_Status()
 
-    if confirm_Next():
-        get_Debit_and_Credit_Intacct()
+        if confirm_Next():
+            DataLoad()
 
-    if confirm_Next():
-        DataLoad()
+        # Phase 10 Close Tool
+        if confirm_Next():
+            close_Browser()
 
-    # Phase 10 Close Tool
-    if confirm_Next():
-        close_Browser()
+        browser.quit()
+        print_hi('Completed with no errors! ')
 
-
-    browser.quit()
-    print_hi('Completed with no errors! ')
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
