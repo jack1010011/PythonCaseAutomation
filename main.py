@@ -136,6 +136,8 @@ def get_CompanyID():
     # the input dialog
     USER_INP_CompanyName = simpledialog.askstring(title="Test", prompt="What's the Company Name?:")
 
+
+
     CompanyName = USER_INP_CompanyName.rstrip().lstrip()
 
     # Search the CompanyId based on the CompanyName entered
@@ -542,7 +544,28 @@ def get_Debit_and_Credit_Intacct():
     ROOT.withdraw()
 
     # the input dialog
-    USER_INP_VerificationCode = simpledialog.askstring(title="Test",prompt="Enter the verification code:")
+    try:
+        USER_INP_VerificationCode = simpledialog.askstring(title="Test",prompt="Enter the verification code:")
+    except:
+        x = messagebox.askyesno("", "Code not entered. Resend code?")
+        if x:
+            print("Quiting browser to start over. ")
+            EdgeBrowser.quit()
+            print("Re-attempting sending code...")
+            get_Debit_and_Credit_Intacct()
+        else:
+            pass
+        pass
+
+    if USER_INP_VerificationCode == "":
+        x = messagebox.askyesno("", "Empty code. Re-attempt sending code?")
+        if x:
+            print("Quiting browser to start over. ")
+            EdgeBrowser.quit()
+            print("Re-attempting sending code...")
+            get_Debit_and_Credit_Intacct()
+        else:
+            pass
 
     EdgeBrowser.find_element_by_id('verify_code').send_keys(USER_INP_VerificationCode)
     EdgeBrowser.find_element_by_id('verify_button').click()
@@ -606,7 +629,7 @@ def get_Debit_and_Credit_Intacct():
             #time.sleep(0.5)
             #tab.perform()
             time.sleep(0.5)
-            enter.perform()
+            # enter.perform()
             break
         print(f"Counter = {counter}")
 
@@ -700,7 +723,7 @@ def get_Debit_and_Credit_Intacct():
         ActionChains(EdgeBrowser).send_keys(Keys.TAB).perform()
         #time.sleep(0.5)
 
-        if counter == 23:
+        if counter == 24:
             print('Triggered!')
             enter.perform()
             #EdgeBrowser.find_element_by_link_text('General Ledger').click()
@@ -722,7 +745,7 @@ def get_Debit_and_Credit_Intacct():
         counter += 1
         tab.perform()
         setName.perform()
-        time.sleep(0.9)
+        # time.sleep(0.9)
 
         if counter == 51:
             break
