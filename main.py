@@ -443,10 +443,12 @@ def get_Debit_and_Credit_DB():
     except:
         DBqueryFailure
         print("DB query failed! ")
-        ans = messagebox.askokcancel("DB Query failed.","DB Query failed using your credentials. Try again with Super User instead?")
-        if ans:
-            db_query_SuperUser()
-        pass
+        # ans = messagebox.askokcancel("DB Query failed.","DB Query failed using your credentials. Try again with Super User instead?")
+        #if ans:
+        #    db_query_SuperUser()
+        #pass
+        print("Attempting again with DBA Credentials...")
+        db_query_SuperUser()
 
 
 
@@ -809,8 +811,13 @@ def DataLoad():
     DLN = messagebox.askyesno('','Perform DataLoad Now?')
 
     if DLN:
+        print("First DataLoad attempt... ")
         browser.get(dataloadLink)
-        print("DataLoad COMPLETED!")
+        print("DataLoad Completed.")
+        time.sleep(1)
+        print("Second DataLoad attempt... ")
+        browser.get(dataloadLink)
+        print("Second DataLoad attempt completed successfully! ")
     else:
         print("DataLoad Skipped...")
 
@@ -878,12 +885,13 @@ def Get_Financial_Report_Regeneration_Status():
                     }
                     Status = ActionStatus.get(row[2], "Invalid State")
                     print(Status)
-                    print(str(row[0]) + " " + str(row[1]) + " " + str(row[2]) + " From " + str(row[4]) + " To " + str( row[5]))
+                    print(str(row[0]) + " " + str(row[1]) + " " + str(row[2]) + " From " + str(row[4]) + " To " + str(row[5]))
 
                     row = cursor.fetchone()
         setattr(Company, "FinancialReportStatus", Status)
     except:
         print("Failure attempting to get Financial Report Regeneration Status ")
+        return ""
         pass
     return Status
 
@@ -934,6 +942,60 @@ def confirm_Next():
         print(f'Phase {phase[0]} discarted with error ', output)
         False
 
+def process_Automation():
+    # Navegation
+    Navegation()
+
+    # Authentication
+    conseroGlobalAuth()
+
+    # PHASE 1 (Search CompanyName Details)
+    get_CompanyID()
+    print(f"CompanyName: '{Company.Name}', CompanyId: '{Company.Id}'")
+
+    # PHASE 2 (Add members)
+    addMembers()
+
+    # PHASE 3 Filtering CompanyName & CompanyID Details
+    get_CompanyID_from_CompanyName()
+
+    # PHASE 4 Confirm the Status of the ActivityId
+    print(f"Phase {phase[0]}: {phase[1]}  - Completed. Continue with Phase {phase[0] + 1}?")
+    get_activityId_status("ActivityId")
+
+    # Get Default Date Range
+    DateRange = DefaultDateRange()
+    print(f'Selected date from {Company.StartDate} to {Company.EndDate}')
+
+    # PHASE 5 DB Query (to retrieve the "Debit" and "Credit" values
+    get_Debit_and_Credit_DB()
+
+    try:
+        messagebox.showinfo(f'{Company.Id} - {Company.Name} ', f'DebitAmount    = {Company.Debit} '
+                                                               f'\nCreditAmount   = {Company.Credit}'
+                                                               f'\n\nBalance        = {Company.Credit - Company.Debit}'
+                                                               f'\n\nDo they match? =  {Company.Credit == Company.Debit}'
+                                                               f'\n\nFrom {Company.StartDate} to {Company.EndDate}')
+    except:
+        print(this.c)
+        pass
+    getIntacctCompanyID()
+
+    if confirm_Next():
+        get_Debit_and_Credit_Intacct()
+
+    if confirm_Next():
+        Get_DataLoad_Status()
+        Get_Financial_Report_Regeneration_Status()
+
+    if confirm_Next():
+        DataLoad()
+
+    Get_Financial_Report_Regeneration_Status()
+
+
+
+
 
 class Company():
 	def __init__(self):
@@ -942,6 +1004,7 @@ class Company():
 	def newAttr(self, attr):
 		setattr(self, attr, attr)
 Company = Company()
+
 
 
 # Press the green button in the gutter to run the script.
@@ -953,76 +1016,24 @@ if __name__ == '__main__':
 
     browser = webdriver.Chrome('D:\\chromedriver.exe')
 
-    Q = messagebox.askyesno("","Use Automated System?")
-    if not Q:
-        ui()
-    else:
-        # Navegation
-        Navegation()
+    x1 = True
+    while x1:
+        Q = messagebox.askyesno("", "Use Automated System?")
+        if not Q:
+            ui()
+        else:
+            process_Automation()
 
-        # Authentication
-        conseroGlobalAuth()
+        ans = messagebox.askokcancel("Automation Process ended successfully.","Re-Run the Automation Process?")
+        if not ans:
+            x1 = False
 
-        # PHASE 1 (Search CompanyName Details)
-        # get_CompanyNameDetails()
-        #if confirm_Next():
-        get_CompanyID()
-        print(f"CompanyName: '{Company.Name}', CompanyId: '{Company.Id}'")
+    # Phase 10 Close Tool
+    if confirm_Next():
+        close_Browser()
 
-        # PHASE 2 (Add members)
-        # if confirm_Next():
-        addMembers()
-
-        # PHASE 3 Filtering CompanyName & CompanyID Details
-        # get_CompanyID_from_CompanyName()
-        # if confirm_Next():
-        get_CompanyID_from_CompanyName()
-
-        # PHASE 4 Confirm the Status of the ActivityId
-        # get_activityId_status(ActivityId):
-        output = messagebox.askokcancel("Title",
-                                        f"Phase {phase[0]}: {phase[1]}  - Completed. Continue with Phase {phase[0] + 1}?")
-        # if confirm_Next():
-        get_activityId_status("ActivityId")
-
-        # Get Default Date Range
-        if confirm_Next():
-            DateRange = DefaultDateRange()
-            print(f'Selected date from {Company.StartDate} to {Company.EndDate}')
-
-        # PHASE 5 DB Query (to retrieve the "Debit" and "Credit" values
-        # get_Debit_and_Credit_DB(CompanyId)
-        if confirm_Next():
-            get_Debit_and_Credit_DB()
-            try:
-                messagebox.showinfo(f'{Company.Id} - {Company.Name} ', f'DebitAmount    = {Company.Debit} '
-                                                                       f'\nCreditAmount   = {Company.Credit}'
-                                                                       f'\nDo they match? =  {Company.Credit == Company.Debit}'
-    
-    
-                                                                       f'\n\nFrom {Company.StartDate} to {Company.EndDate}')
-            except:
-                print(this.c)
-                pass
-        if confirm_Next():
-            getIntacctCompanyID()
-
-        if confirm_Next():
-            get_Debit_and_Credit_Intacct()
-
-        if confirm_Next():
-            Get_DataLoad_Status()
-            Get_Financial_Report_Regeneration_Status()
-
-        if confirm_Next():
-            DataLoad()
-
-        # Phase 10 Close Tool
-        if confirm_Next():
-            close_Browser()
-
-        browser.quit()
-        print_hi('Completed with no errors! ')
+    browser.quit()
+    print_hi('Completed with no errors! ')
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
