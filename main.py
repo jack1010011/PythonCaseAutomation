@@ -28,6 +28,7 @@ def ui():
 
     Title_Label = Label(root, text="Intacct Validation Errors ")
     Title_Label.pack()
+    x = False
 
     def SIMPLENavigate():
         Navegation()
@@ -53,8 +54,57 @@ def ui():
         label2 = Label(root, text=f"DebitAmount = '{Company.Debit}' \nCreditAmount= '{Company.Credit}'")
         label2.pack(pady=20)
 
+
+    def Get_DataLoad_Status_Loop():
+        x = 10
+        while x > 0:
+            Get_DataLoad_Status
+            print(str(Get_DataLoad_Status))
+
+            if Get_DataLoad_Status == "InProgress":
+                print("waiting... \n")
+                time.sleep(3)
+            else:
+                print("DataLoad Completed! \n")
+                break
+
+    def Get_Financial_Report_Regeneration_Status_Loop():
+        x = 10
+        while x > 0:
+            print(str(Get_Financial_Report_Regeneration_Status))
+            print("\n\n**** Second Print Attempt ****\n\n")
+            Get_Financial_Report_Regeneration_Status()
+
+
+            if Get_Financial_Report_Regeneration_Status == "InProgress":
+                print("waiting... ")
+            else:
+                print("Financial Report Regeneration Completed! ")
+                break
+
+
+
     button2 = tkinter.Button(root, text="Get DB Credit & Debit", command=DB_Credit_Debit)
     button2.pack()
+    button3 = tkinter.Button(root, text="Get DataLoad Status", command=Get_DataLoad_Status)
+    button3.pack()
+    button4 = tkinter.Button(root, text="Get Financial Report Regeneration Status LOOP", command=Get_Financial_Report_Regeneration_Status_Loop)
+    button4.pack()
+    button6 = tkinter.Button(root, text="Get DataLoad Status LOOP", command=Get_DataLoad_Status_Loop)
+    button6.pack()
+    button7 = tkinter.Button(root, text="Get Financial Report Regeneration Status",command=Get_Financial_Report_Regeneration_Status)
+    button7.pack()
+    button8 = tkinter.Button(root, text="CMSWorkflowAudits table to avoid crash Error Checker", command=CMSWorkflowAudits_table_to_avoid_crash_Error_Checker)
+    button8.pack()
+    button9 = tkinter.Button(root, text="CMSWorkflowAudits table to avoid crash Error Fixer", command=CMSWorkflowAudits_table_to_avoid_crash_Error_Fixer)
+    button9.pack()
+    button10 = tkinter.Button(root, text="Get Default Financial Report Generation Dates", command=Get_Financial_Report_Generation_Dates)
+    button10.pack()
+    button11 = tkinter.Button(root, text="Update Default Financial Report Generation Initial Date to Dic 2018", command=Get_Financial_Report_Generation_Date_Update)
+    button11.pack()
+
+    button5 = tkinter.Button(root, text="DataLoad",command=DataLoad)
+    button5.pack()
 
     def onClickExit():
         print("Testing222")
@@ -65,7 +115,6 @@ def ui():
     buttonExit.pack(pady=10)
 
     root.mainloop()
-
 
 def Navegation():
     browser.set_window_size(1500, 900, windowHandle='current')
@@ -141,6 +190,8 @@ def get_CompanyID():
     CompanyName = USER_INP_CompanyName.rstrip().lstrip()
 
     # Search the CompanyId based on the CompanyName entered
+    from selenium.webdriver.common.keys import Keys
+    myElem.send_keys(Keys.CONTROL + "A")
     myElem.send_keys(CompanyName)
 
     #CompanyIdEle = browser.find_element_by_class_name('ag-cell-wrapper')
@@ -300,6 +351,8 @@ def get_CompanyID_from_CompanyName():
         try:
             print("Attempting searchFilter...")
             searchFilter = WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.XPATH, "//div[@id='activitiesTable_filter']/label/input[@aria-controls='activitiesTable']")))
+            from selenium.webdriver.common.keys import Keys
+            searchFilter.send_keys(Keys.CONTROL + "A")
             searchFilter.send_keys('financials')
             print("searchFilter Completed Successfully! ")
         except:
@@ -789,21 +842,22 @@ def get_Debit_and_Credit_Intacct():
     # wait.until(EC.presence_of_element_located((By.XPATH, xpath_value))).send_keys(Keys.RETURN)
 
 def DataLoad():
+    EdgeBrowser.set_window_size(1500, 900, windowHandle='current')
     # primero inicia sesión acá https://consero-prod-north.azurewebsites.net
-    browser.get("https://consero-prod-north.azurewebsites.net")
+    EdgeBrowser.get("https://consero-prod-north.azurewebsites.net")
 
-    browser.find_element_by_id('username').send_keys('shalom@conseroglobal.com')
-    elem = browser.find_element_by_id('password')
+    EdgeBrowser.find_element_by_id('username').send_keys('shalom@conseroglobal.com')
+    elem = EdgeBrowser.find_element_by_id('password')
     elem.send_keys('#SHALOMeli1')
     elem.submit()
 
     # https://consero-prod-north.azurewebsites.net/api/Intacct/TriggerAPIToReloadData?companyId=2582&startDate=05/01/2021&endDate=05/31/2021&IntervalInDays=30
 
     encaps = Company.StartDate.split("/")
-    Company.StartDate = f"{encaps[0]}/{encaps[1]}/20{encaps[2]}"
+    Company.StartDate = f"{encaps[0]}/{encaps[1]}/{encaps[2]}"
 
     encaps = Company.EndDate.split("/")
-    Company.EndDate = f"{encaps[0]}/{encaps[1]}/20{encaps[2]}"
+    Company.EndDate = f"{encaps[0]}/{encaps[1]}/{encaps[2]}"
 
     dataloadLink = f"https://consero-prod-north.azurewebsites.net/api/Intacct/TriggerAPIToReloadData?companyId={Company.Id}&startDate={Company.StartDate}&endDate={Company.EndDate}&IntervalInDays=30"
     print("DATALOAD!!! ====>    ", dataloadLink)
@@ -812,11 +866,11 @@ def DataLoad():
 
     if DLN:
         print("First DataLoad attempt... ")
-        browser.get(dataloadLink)
+        EdgeBrowser.get(dataloadLink)
         print("DataLoad Completed.")
         time.sleep(1)
         print("Second DataLoad attempt... ")
-        browser.get(dataloadLink)
+        EdgeBrowser.get(dataloadLink)
         print("Second DataLoad attempt completed successfully! ")
     else:
         print("DataLoad Skipped...")
@@ -828,16 +882,46 @@ def DataLoad():
     phase[1] = 'DataLoad'
     phase[2] = "Phase 10 - Go to Intacct and compare Debit and Credit values"
     print_hi(f' - Phase {phase[0]} - {phase[1]} - Completed!')
+
 #Requires CompanyId
 def Get_DataLoad_Status():
     print("DataLoad Status: ")
     import pyodbc
     server = 'jvtmcg7krk.database.windows.net'
     database = f'consero-prod'
-    username = 'consero-admin@jvtmcg7krk'
-    password = 'C0nser0P0rtalI$Awes0me'
+    # username = 'consero-admin@jvtmcg7krk'
+    # password = 'C0nser0P0rtalI$Awes0me'
+    username = 'conThinkSupport'
+    password = 'C0n$ero@l0ckDown_469'
     driver = '{ODBC Driver 17 for SQL Server}'
     # Company.Id = '2434'
+
+
+    try:
+        with pyodbc.connect(
+                'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""SELECT *
+                    FROM [{database}].[dbo].[Lookups] 
+                    WHERE [key] = 'StagingEndDate{Company.Id}'""")
+                row = cursor.fetchone()
+                while row:
+                    print(f"value1 = {str(row[3])}")
+                    print(f"value2 = {str(row[4])}")
+
+                    if str(row[3]) + str(row[4]) == '':
+                        print(f"There are no DataLoads in progress for {Company.Name} with company id {Company.Id}")
+                    else:
+                        messagebox.showinfo(f"There's a DataLoad in progress...  Iniciated on {str(row[4])}")
+
+
+                    row = cursor.fetchone()
+        #setattr(Company, "DataLoadStatus", DebitTotal)
+    except:
+        print("SuperUser DB query 1 failed! ")
+        pass
+
 
     try:
         with pyodbc.connect(
@@ -850,20 +934,23 @@ def Get_DataLoad_Status():
                 row = cursor.fetchone()
                 while row:
                     print(f"DataLoad StartDate = {str(row[3])}")
-                    print(f"DataLoad EndDate   = {str(row[4])}")
+                    print(f"DataLoad EndDate   = {str(row[4])}\n")
                     row = cursor.fetchone()
         #setattr(Company, "DataLoadStatus", DebitTotal)
     except:
-        print("SuperUser DB query failed! ")
+        print("SuperUser DB query 2 failed! ")
         pass
+
 #Requires CompanyId
 def Get_Financial_Report_Regeneration_Status():
     print("Financial Report Regeneration Status: ")
     import pyodbc
     server = 'jvtmcg7krk.database.windows.net'
     database = f'consero-prod'
-    username = 'consero-admin@jvtmcg7krk'
-    password = 'C0nser0P0rtalI$Awes0me'
+    # username = 'consero-admin@jvtmcg7krk'
+    # password = 'C0nser0P0rtalI$Awes0me'
+    username = 'conThinkSupport'
+    password = 'C0n$ero@l0ckDown_469'
     driver = '{ODBC Driver 17 for SQL Server}'
     # Company.Id = '2434'
 
@@ -884,16 +971,155 @@ def Get_Financial_Report_Regeneration_Status():
                         4: "PartiallyGenerated",
                     }
                     Status = ActionStatus.get(row[2], "Invalid State")
-                    print(Status)
-                    print(str(row[0]) + " " + str(row[1]) + " " + str(row[2]) + " From " + str(row[4]) + " To " + str(row[5]))
-
+                    print(f"   {Status}")
+                    print(f"   " + str(row[0]) + " " + str(row[1]) + " " + str(row[2]) + " From " + str(row[4]) + " To " + str(row[5]))
+                    print("")
                     row = cursor.fetchone()
         setattr(Company, "FinancialReportStatus", Status)
+        return str(Status)
     except:
         print("Failure attempting to get Financial Report Regeneration Status ")
         return ""
         pass
     return Status
+
+def CMSWorkflowAudits_table_to_avoid_crash_Error_Checker():
+    print("CMSWorkflowAudits Crash error checker...  ")
+    import pyodbc
+    server = 'jvtmcg7krk.database.windows.net'
+    database = f'consero-prod'
+    # username = 'consero-admin@jvtmcg7krk'
+    # password = 'C0nser0P0rtalI$Awes0me'
+    username = 'conThinkSupport'
+    password = 'C0n$ero@l0ckDown_469'
+    driver = '{ODBC Driver 17 for SQL Server}'
+    # Company.Id = '2434'
+
+    try:
+        with pyodbc.connect(
+                'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""SELECT *
+                        FROM [{database}].[dbo].[CMSWorkflowAudits] 
+                        WHERE CompanyId IN ({Company.Id})""")
+                row = cursor.fetchone()
+                while row:
+                    print(f"value1 = {str(row[0])}, value2 = {str(row[1])}")
+
+                    if str(row[0]) == '':
+                        print(f"There are no Entries in the CMSWorkflowAudits table for {Company.Name}  with company id {Company.Id}. \n"
+                              f"Potential risk of Financial Regeneration Failure.  ")
+                        return True
+                    else:
+                        print(f"Passed! There are  Entries in the CMSWorkflowAudits table for {Company.Name}")
+                        return False
+                    row = cursor.fetchone()
+        # setattr(Company, "DataLoadStatus", DebitTotal)
+    except:
+        print("SuperUser DB query 1 failed! ")
+        pass
+
+def CMSWorkflowAudits_table_to_avoid_crash_Error_Fixer():
+    print("CMSWorkflowAudits Crash error fixer...  ")
+    import pyodbc
+    server = 'jvtmcg7krk.database.windows.net'
+    database = f'consero-prod'
+    # username = 'consero-admin@jvtmcg7krk'
+    # password = 'C0nser0P0rtalI$Awes0me'
+    username = 'conThinkSupport'
+    password = 'C0n$ero@l0ckDown_469'
+    driver = '{ODBC Driver 17 for SQL Server}'
+    # Company.Id = '2434'
+
+    n = messagebox.askokcancel("", f"There are no CMSWorkflowAudits for {Company.Name} table with company id {Company.Id},\n"
+                               "To resolve this issue, one record should be inserted into the CMSWorkflowAudits table. \n"
+                               "Would you like to insert a record now? ")
+
+    if n:
+        try:
+            with pyodbc.connect(
+                    'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(f"""INSERT INTO [CMSWorkflowAudits] ([CompanyId],[ActionBy],[ActionByUser],[StandardReportActivity],[Action],[StartActionTime],[EndActionTime],[ActionStatus])
+VALUES ({Company.Id},7918,'Jhonny Corella',1,'GenerateReports','2021-07-21 12:16:30.0978626','2021-07-21 12:21:35.5775264',-1)""")
+
+                    print("Insert Completed! \nA record has been successfully inserted into the CMSWorkflowAudits table ")
+                    print("You should be able to see financials view now and regenerate from there.")
+            # setattr(Company, "DataLoadStatus", DebitTotal)
+        except:
+            print("DB query failed!\nSomething went wrong. ")
+            pass
+
+def Get_Financial_Report_Generation_Dates():
+    import pyodbc
+    server = 'jvtmcg7krk.database.windows.net'
+    database = f'consero-prod-{Company.Id}'
+    username = 'consero-admin@jvtmcg7krk'
+    password = 'C0nser0P0rtalI$Awes0me'
+    #username = 'conThinkSupport'
+    #password = 'C0n$ero@l0ckDown_469'
+    driver = '{ODBC Driver 17 for SQL Server}'
+    startDate = Company.StartDate
+    endDate = Company.EndDate
+
+    print(f"{database}")
+
+    try:
+        with pyodbc.connect(
+                'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"SELECT * FROM [{database}].[dbo].[StandardReportsMonthMappings] ")
+                row = cursor.fetchone()
+                while row:
+                    # print(str(row[0]) + " " + str(row[1]))
+                    print(f"startDate = {int(row[3])}")
+                    print(f"endDate = {int(row[2])}")
+                    row = cursor.fetchone()
+    except:
+        print("DB query failed! ")
+        pass
+
+    database = f'consero-prod'
+    try:
+        with pyodbc.connect(
+                'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"SELECT * FROM [dbo].[StandardReportsMonthMappings] ")
+                row = cursor.fetchone()
+                while row:
+                    # print(str(row[0]) + " " + str(row[1]))
+                    print(f"startDate = {int(row[3])}")
+                    print(f"endDate = {int(row[2])}")
+                    row = cursor.fetchone()
+    except:
+        print("DB query failed! ")
+        pass
+
+def Get_Financial_Report_Generation_Date_Update():
+    import pyodbc
+    server = 'jvtmcg7krk.database.windows.net'
+    database = f'consero-prod-{Company.Id}'
+    # username = 'consero-admin@jvtmcg7krk'
+    # password = 'C0nser0P0rtalI$Awes0me'
+    username = 'conThinkSupport'
+    password = 'C0n$ero@l0ckDown_469'
+    driver = '{ODBC Driver 17 for SQL Server}'
+    print(f"{database}")
+
+    try:
+        with pyodbc.connect(
+                'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f"update [StandardReportsMonthMappings] set ReportGenerationStartTime = '2018-12-01 00:00:00' WHERE CompanyId IN ({Company.Id})")
+                cursor.fetchone()
+                print(f"Done! Successfully Updated to default date (Dic 2018 )")
+    except:
+        print("DB query failed! ")
+        pass
+
 
 def list_Companies():
     #elem = browser.find_element_by_class_name('ag-center-cols-container')
@@ -943,11 +1169,7 @@ def confirm_Next():
         False
 
 def process_Automation():
-    # Navegation
-    Navegation()
 
-    # Authentication
-    conseroGlobalAuth()
 
     # PHASE 1 (Search CompanyName Details)
     get_CompanyID()
@@ -965,33 +1187,38 @@ def process_Automation():
 
     # Get Default Date Range
     DateRange = DefaultDateRange()
-    print(f'Selected date from {Company.StartDate} to {Company.EndDate}')
+    print(f'Selected date from {Company.StartDate} to {Company.EndDate}\n')
 
-    # PHASE 5 DB Query (to retrieve the "Debit" and "Credit" values
-    get_Debit_and_Credit_DB()
 
-    try:
-        messagebox.showinfo(f'{Company.Id} - {Company.Name} ', f'DebitAmount    = {Company.Debit} '
-                                                               f'\nCreditAmount   = {Company.Credit}'
-                                                               f'\n\nBalance        = {Company.Credit - Company.Debit}'
-                                                               f'\n\nDo they match? =  {Company.Credit == Company.Debit}'
-                                                               f'\n\nFrom {Company.StartDate} to {Company.EndDate}')
-    except:
-        print(this.c)
-        pass
     getIntacctCompanyID()
+
+    phase[0] = 2
+    phase[1] = "Financial Report Regeneration"
+    phase[2] = "DataLoad"
+
+    Get_DataLoad_Status()
+    Get_Financial_Report_Regeneration_Status()
+
+    if confirm_Next():
+        DataLoad()
+        EdgeBrowser.set_window_size(20, 20, windowHandle='current')
+
+        # PHASE 5 DB Query (to retrieve the "Debit" and "Credit" values
+        get_Debit_and_Credit_DB()
+
+        try:
+            messagebox.showinfo(f'{Company.Id} - {Company.Name} ', f'DebitAmount    = {Company.Debit} '
+                                                                   f'\nCreditAmount   = {Company.Credit}'
+                                                                   f'\n\nBalance        = {Company.Credit - Company.Debit}'
+                                                                   f'\n\nDo they match? =  {Company.Credit == Company.Debit}'
+                                                                   f'\n\nFrom {Company.StartDate} to {Company.EndDate}')
+        except:
+            print(this.c)
+            pass
 
     if confirm_Next():
         get_Debit_and_Credit_Intacct()
 
-    if confirm_Next():
-        Get_DataLoad_Status()
-        Get_Financial_Report_Regeneration_Status()
-
-    if confirm_Next():
-        DataLoad()
-
-    Get_Financial_Report_Regeneration_Status()
 
 
 
@@ -1015,6 +1242,14 @@ if __name__ == '__main__':
     phase[2] = ''
 
     browser = webdriver.Chrome('D:\\chromedriver.exe')
+    EdgeBrowser = webdriver.Edge('D:\\msedgedriver.exe')
+    EdgeBrowser.set_window_size(20, 20, windowHandle='current')
+
+    # Navegation
+    Navegation()
+
+    # Authentication
+    conseroGlobalAuth()
 
     x1 = True
     while x1:
